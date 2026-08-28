@@ -9,11 +9,14 @@ TRSS-Yunzai / Yunzai-Bot 群聊 B 站动态推送插件。
 - 只有主人可以修改推送设置
 - 支持推送时 @全体成员
 - 支持推送时 @指定成员
-- 推送动态标题、封面、UP 主名称和动态地址
+- 调用 `bili-card-plugin` 生成高清动态 UI 卡片
+- @、卡片图片与“UP主的动态 + 链接”合并为一条群消息
 
 ## 安装
 
 将 `bili-dynamic-push` 目录放到 Yunzai 的 `plugins/` 目录下，然后重启 Yunzai。
+
+高清推送需同时安装 `plugins/bili-card-plugin`。如 UI 插件临时渲染失败，动态监控、基线和推送记录不受影响，会回退为 B站原封面。
 
 主插件文件路径应为：
 
@@ -25,6 +28,14 @@ Yunzai/plugins/bili-dynamic-push/biliDynamicPush.js
 
 ```text
 data/bili-dynamic-push/config.json
+```
+
+新动态的发送顺序为（同一条消息）：
+
+```text
+@指定成员 / @全体成员
+[高清动态 UI 图片]
+XXX的动态 https://www.bilibili.com/opus/...
 ```
 
 ## 命令

@@ -369,13 +369,13 @@ export class biliDynamicPush extends plugin {
     if (group.atAll) msg.push(segment.at('all'))
     for (const qq of group.atMembers || []) msg.push(segment.at(Number(qq)))
 
-    msg.push([
-      `【${dynamic.name || '未知UP'}】${dynamic.action}`,
-      `标题：${dynamic.title || '无标题动态'}`,
-      `地址：${dynamic.url}`
-    ].join('\n'))
-
-    if (dynamic.cover) msg.push(segment.image(dynamic.cover))
+    const image = await renderDynamicUiImage(dynamic)
+    if (msg.length) msg.push('\n')
+    if (image) {
+      msg.push(image)
+      msg.push('\n')
+    }
+    msg.push(`${dynamic.name || '未知UP主'}的动态 ${dynamic.url}`)
 
     await Bot.pickGroup(Number(groupId)).sendMsg(msg)
   }
@@ -700,8 +700,21 @@ function parseDynamic (item) {
     action: dynamicTypeName(dynamicType),
     title: cleanText(title, 80),
     cover,
-    url: `https://t.bilibili.com/${id}`
+    url: `https://www.bilibili.com/opus/${id}`,
+    rawItem: item
   }
+}
+
+async function renderDynamicUiImage (dynamic) {
+  try {
+    const { renderDynamicCardForPush } = await import('../bili-card-plugin/lib/push.js')
+    const result = await renderDynamicCardForPush(dynamic.id, { item: dynamic.rawItem })
+    if (result?.image) return result.image
+  } catch (error) {
+    logger.warn(`[${pluginName}] 调用 bili-card-plugin 动态 UI 失败，回退原封面：${error?.message || error}`)
+  }
+
+  return dynamic.cover ? segment.image(dynamic.cover) : null
 }
 
 function parseMajor (major) {
